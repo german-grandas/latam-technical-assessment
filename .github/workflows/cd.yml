@@ -1,0 +1,35 @@
+name: Continuous Delivery
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t us-east4-docker.pkg.dev/prueba-174817/latam-test .
+          docker login -u _json_key -p "$GCP_KEY" https://gcr.io
+          docker push us-east4-docker.pkg.dev/prueba-174817/latam-test
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud config set project latam-test
+          gcloud auth activate-service-account --key-file=<(echo $GCP_KEY)
+          gcloud run deploy latam-test --image us-east4-docker.pkg.dev/prueba-174817/latam-test --platform managed --region us-east4
+
+      - name: Set up GCP credentials
+        run: echo "$GCP_KEY" > "$HOME"/gcp-key.json
+
+  # Add your secrets in the repository settings:
+  # GCP_KEY: ${{ secrets.GCP_KEY }}
