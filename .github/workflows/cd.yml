@@ -18,13 +18,15 @@ jobs:
         with:
           credentials_json: "${{ secrets.GCP_CREDENTIALS_JSON }}"
 
-      -- name: "Set up Cloud SDK"
+      - name: Set up Cloud SDK
         uses: "google-github-actions/setup-gcloud@v1"
+        with:
+          project_id: "prueba-174817"
 
-      - name: "Use gcloud CLI"
-        run: "gcloud info"
-      
-      - name: "Docker auth"
+      - name: Use gcloud CLI
+        run: gcloud info
+
+      - name: Docker auth
         run: |-
           gcloud auth configure-docker us-east4-docker.pkg.dev --quiet
 
