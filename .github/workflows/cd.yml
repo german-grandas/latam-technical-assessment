@@ -35,11 +35,21 @@ jobs:
           docker build -t us-east4-docker.pkg.dev/prueba-174817/latam-test/main:latest .
           docker push us-east4-docker.pkg.dev/prueba-174817/latam-test/main:latest
 
-      - name: Deploy to Cloud Run
-        run: |
-          gcloud config set project latam-test
-          gcloud auth activate-service-account --key-file=<(echo $GCP_KEY)
-          gcloud run deploy latam-test --image us-east4-docker.pkg.dev/prueba-174817/latam-test --platform managed --region us-east4
+      - name: Create Service declaration
+        run: |-
+          export CONTAINER_IMAGE="us-east4-docker.pkg.dev/prueba-174817/latam-test/main:latest"
+          export SERVICE_NAME="latam-test"
+          export PROJECT_ID="prueba-174817"
+          export REVISION_TAG="latest"
+          export CLOUD_RUN_SA="latam-github-integration"
+          export ENVIRONMENT="test"
+          envsubst < ./service-yaml/container.yaml > container-test.yaml
+          cat container-test.yaml
 
-      - name: Set up GCP credentials
-        run: echo "$GCP_KEY" > "$HOME"/gcp-key.json
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v0
+        with:
+          service: latam-test
+          region: us-east4
+          metadata: container-test.yaml
