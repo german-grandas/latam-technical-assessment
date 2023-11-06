@@ -9,22 +9,27 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: "auth"
-        uses: "google-github-actions/auth@v1"
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Auth
+        uses: google-github-actions/auth@v1
         with:
           credentials_json: "${{ secrets.GCP_CREDENTIALS_JSON }}"
 
-      - name: Checkout code
-        uses: actions/checkout@v2
+      -- name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v1"
 
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v1
+      - name: "Use gcloud CLI"
+        run: "gcloud info"
+      
+      - name: "Docker auth"
+        run: |-
+          gcloud auth configure-docker us-east4-docker.pkg.dev --quiet
 
       - name: Build and push Docker image
         run: |
-          gcloud auth configure-docker
           docker build -t us-east4-docker.pkg.dev/prueba-174817/latam-test:latest .
           docker push us-east4-docker.pkg.dev/prueba-174817/latam-test:latest
 
