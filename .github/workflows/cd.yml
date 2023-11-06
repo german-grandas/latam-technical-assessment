@@ -1,9 +1,10 @@
 name: Continuous Delivery
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types:
+      - completed
 
 jobs:
   deploy:
@@ -30,6 +31,3 @@ jobs:
 
       - name: Set up GCP credentials
         run: echo "$GCP_KEY" > "$HOME"/gcp-key.json
-
-  # Add your secrets in the repository settings:
-  # GCP_KEY: ${{ secrets.GCP_KEY }}
