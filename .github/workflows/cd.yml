@@ -43,6 +43,7 @@ jobs:
           export REVISION_TAG="latest"
           export CLOUD_RUN_SA="latam-github-integration"
           export ENVIRONMENT="test"
+          mkdir ./service-yaml/
           envsubst < ./service-yaml/container.yaml > container-test.yaml
           cat container-test.yaml
 
@@ -53,3 +54,6 @@ jobs:
           service: latam-test
           region: us-east4
           metadata: container-test.yaml
+
+      - name: Run stress-test
+        run: make stress-test
